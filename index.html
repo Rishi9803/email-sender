@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Marketing - Ideal Media Marketing</title>
+    <link rel="stylesheet" href="/static/style.css">
+
+    <!-- ✅ Latest Quill.js for full email editing -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <h1>📧 Professional Email Marketing Tool</h1>
+        <p>Send Personalized Emails with Attachments</p>
+    </header>
+
+    <div class="container">
+        <form id="emailForm" enctype="multipart/form-data">
+            <label for="email_sender">Sender Email:</label>
+            <input type="email" id="email_sender" name="email_sender" placeholder="you@example.com" required>
+
+            <label for="email_password">Sender Password:</label>
+            <input type="password" id="email_password" name="email_password" placeholder="Your email password" required>
+
+            <label for="subject">Email Subject (Use {{column_name}} for dynamic values):</label>
+            <input type="text" id="subject" name="subject" placeholder="Hello {{Name}}, Get {{Discount}} today!" required>
+
+            <!-- ✅ This is where Quill.js will load -->
+            <label for="message_body">Email Content:</label>
+            <div id="quill-editor" style="height: 300px;"></div>
+            <input type="hidden" name="message_body" id="message_body" required>
+
+            <label for="file">Upload Excel File (Must contain "Email" column):</label>
+            <input type="file" id="file" name="file" accept=".xlsx" required>
+
+            <label for="image">Upload Image:</label>
+            <input type="file" id="image" name="image" accept="image/*">
+
+            <button type="submit">🚀 Send Emails</button>
+        </form>
+
+        <div id="response"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Initialize Quill editor
+            const quill = new Quill('#quill-editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        [{ 'align': [] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['link', 'image'],
+                        ['blockquote', 'code-block'],
+                    ],
+                }
+            });
+    
+            // Before submitting form, grab content from Quill and set it to the hidden input
+            document.getElementById("emailForm").onsubmit = function (event) {
+                event.preventDefault();  // Prevent the default form submission (page refresh)
+                document.getElementById("message_body").value = quill.root.innerHTML;
+    
+                const formData = new FormData(this);  // Create FormData object from the form
+    
+                // Use AJAX to submit the form without reloading the page
+                fetch('/send_emails', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    alert(data.success || data.error);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error occurred while sending emails');
+                });
+            };
+        });
+    </script>
+    
+
+</body>
+</html>
